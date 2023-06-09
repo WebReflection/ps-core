@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <title>python workers</title>
+    </head>
+    <body>
+        <div>See console ➡️</div>
+        <!-- XWorker - JavaScript to MicroPython -->
+        <script type="module">
+            import { XWorker } from "../../min.js";
+
+            const w = new XWorker("./worker.py", { type: "mpy" });
+            w.postMessage("JavaScript: Hello MicroPython 👋");
+            w.onmessage = (event) => {
+                console.log(event.data);
+            };
+        </script>
+
+        <!-- XWorker - MicroPython to MicroPython -->
+        <script type="mpy">
+            from js import XWorker
+
+            def handle_message(event):
+              print(event.data)
+
+            w = XWorker('./worker.py')
+            w.postMessage('MicroPython: Hello MicroPython 👋')
+            w.onmessage = handle_message
+        </script>
+
+        <!-- XWorker - MicroPython to Pyodide -->
+        <script type="mpy">
+            from js import XWorker
+
+            def handle_message(event):
+              print(event.data)
+
+            w = XWorker('./worker.py', **{'type': 'py', 'async': True, 'config': '../fetch.toml'})
+            w.postMessage('MicroPython: Hello Pyodide 👋')
+            w.onmessage = handle_message
+        </script>
+
+        <!-- XWorker - MicroPython to Lua -->
+        <script type="mpy">
+            from js import XWorker
+
+            def handle_message(event):
+              print(event.data)
+
+            w = XWorker('./worker.lua', type='lua')
+            w.postMessage('MicroPython: Hello Lua 👋')
+            w.onmessage = handle_message
+        </script>
+    </body>
+</html>

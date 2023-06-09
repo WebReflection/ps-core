@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <title>python workers</title>
+        <script type="module" src="../../min.js"></script>
+    </head>
+    <body>
+        <script type="mpy">
+            from js import XWorker, Promise, document
+
+            deferred = Promise.withResolvers()
+
+            def handle_result(event):
+              inputs = document.querySelectorAll('input')
+              inputs[0].disabled = True
+              inputs[1].disabled = True
+              deferred.resolve(inputs[0].value)
+
+            def handle_input(data):
+              inputs = document.querySelectorAll('input')
+              inputs[0].placeholder = data
+              inputs[0].disabled = False
+              inputs[1].disabled = False
+              return deferred.promise
+
+            w = XWorker('./input.lua', type='lua')
+            w.sync.input = handle_input
+        </script>
+        <input type="text" placeholder="loading ..." required disabled />
+        <input type="submit" mpy-click="handle_result(event)" disabled />
+    </body>
+</html>

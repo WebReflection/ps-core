@@ -1,0 +1,39 @@
+import { fetchPaths, stdio } from "./_utils.js";
+import {
+    run,
+    runAsync,
+    runEvent,
+    runWorker,
+    runWorkerAsync,
+    writeFile,
+} from "./_python.js";
+
+const type = "micropython";
+
+let patchPromise = true;
+
+// REQUIRES INTEGRATION TEST
+/* c8 ignore start */
+export default {
+    type: [type, "mpy"],
+    module: () => `https://webreflection.github.io/ps-core/micropython/micropython.mjs`,
+    async engine({ loadMicroPython }, config, url) {
+        // @bug https://github.com/micropython/micropython/issues/11749
+        if (patchPromise) {
+            patchPromise = false;
+            globalThis.Promise = class extends Promise {};
+        }
+        const { stderr, stdout, get } = stdio();
+        url = url.replace(/\.m?js$/, ".wasm");
+        const runtime = await get(loadMicroPython({ stderr, stdout, url }));
+        if (config.fetch) await fetchPaths(this, runtime, config.fetch);
+        return runtime;
+    },
+    run,
+    runAsync,
+    runEvent,
+    runWorker,
+    runWorkerAsync,
+    writeFile,
+};
+/* c8 ignore stop */
